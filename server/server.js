@@ -3,7 +3,7 @@ const {ObjectID} = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-
+const port = process.env.PORT || 3000;
 
 const {User} = require('./Models/user');
 const {Todo} = require('./Models/todo');
@@ -12,7 +12,7 @@ const app = express();
 app.use(bodyParser.json());
 
 
-app.listen(3000, () => {
+app.listen(port, () => {
     console.log('Listening on port 3000.\n\t-Webserver has started.');
 });
 
