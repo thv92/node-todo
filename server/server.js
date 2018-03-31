@@ -11,11 +11,6 @@ const {Todo} = require('./Models/todo');
 const app = express();
 app.use(bodyParser.json());
 
-
-app.listen(port, () => {
-    console.log('Listening on port 3000.\n\t-Webserver has started.');
-});
-
 app.post('/todos', (req, res) => {
     const addTodo = new Todo({...req.body});
     addTodo.save().then((doc) => {
@@ -47,6 +42,10 @@ app.get('/todos/:id', (req, res) => {
     }).catch( (err) => {
         res.status(400).send();
     });
+});
+
+app.listen(port, () => {
+    console.log('Listening on port 3000.\n\t-Webserver has started.');
 });
 
 module.exports = {app};
