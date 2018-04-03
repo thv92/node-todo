@@ -38,11 +38,28 @@ app.get('/todos/:id', (req, res) => {
         if(!todo) {
             res.status(404).send();
         }
-        res.status.send({todo})
+        res.send({todo})
     }).catch( (err) => {
         res.status(400).send();
     });
 });
+
+app.delete('todos/:id', (req, res) => {
+    const id = req.params.id;
+    if(!ObjectID.isValid(id)) {
+        res.status(404).send();
+    }
+
+    Todo.findByIdAndRemove(id).then((doc) => {
+        if(!doc) {
+            res.status(404).send();
+        }
+        res.send({doc});
+    }).catch((err) => {
+        res.status(400).send();
+    });
+});
+
 
 app.listen(port, () => {
     console.log('Listening on port 3000.\n\t-Webserver has started.');
