@@ -2,6 +2,8 @@ const {mongoose} = require('./db/mongoose');
 const {ObjectID} = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
+
 
 const port = process.env.PORT || 3000;
 
@@ -58,6 +60,33 @@ app.delete('todos/:id', (req, res) => {
     }).catch((err) => {
         res.status(400).send();
     });
+});
+
+
+app.patch('todos/:id', (res, req) => {
+    const id = req.params.id;
+    //use pick to only take params that user can change
+    const body = _.pick(req.body, ['text', 'completed']);
+
+    if(ObjectID.isValid(id)) {
+        res.status(404).send();
+    }
+    
+    if(_.isBoolean(body.completed) && body.completed) {
+        body.completedAt = new Date().getTime();
+    } else {
+        body.completed = false;
+        body.completedAt = null;
+    } 
+
+    Todo.findByIdAndUpdate(id, {$set: {body}}, {new: true}).then((err, todo) => {
+        //Check if todo object exists
+        if(!todo) {
+            res.status(404).send();
+        }
+        res.send({todo})
+
+    }).catch((e) => res.status(400).send(e));
 });
 
 

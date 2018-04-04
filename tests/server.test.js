@@ -127,11 +127,17 @@ describe('DELETE /todos/id', () => {
     });
 
     it('Should return 404 if todo not found', (done) => {
-
+        request(app)
+          .delete(`/todos/${new ObjectID().toHexString()}`)
+          .expect(404)
+          .end(done);
     });
 
     it('Should return 404 if object ID is invalid', (done) => {
-
+        request(app)
+          .delete('todos/123')
+          .expect(404)
+          .end(done);
     });
 
 })
