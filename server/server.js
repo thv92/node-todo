@@ -1,5 +1,5 @@
 const {mongoose} = require('./db/mongoose');
-const {ObjectID} = require('mongoose');
+const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
@@ -33,6 +33,9 @@ app.get('/todos', (req, res) => {
 
 app.get('/todos/:id', (req, res) => {
     const id = req.params.id;
+    console.log('TODO: ',id);
+
+
     if(!ObjectID.isValid(id))
         res.status(404).send();
 
@@ -46,7 +49,7 @@ app.get('/todos/:id', (req, res) => {
     });
 });
 
-app.delete('todos/:id', (req, res) => {
+app.delete('/todos/:id', (req, res) => {
     const id = req.params.id;
     if(!ObjectID.isValid(id)) {
         res.status(404).send();
@@ -63,12 +66,11 @@ app.delete('todos/:id', (req, res) => {
 });
 
 
-app.patch('todos/:id', (res, req) => {
+app.patch('/todos/:id', (req, res) => {
     const id = req.params.id;
     //use pick to only take params that user can change
     const body = _.pick(req.body, ['text', 'completed']);
-
-    if(ObjectID.isValid(id)) {
+    if(!ObjectID.isValid(id)) {
         res.status(404).send();
     }
     
@@ -79,14 +81,17 @@ app.patch('todos/:id', (res, req) => {
         body.completedAt = null;
     } 
 
-    Todo.findByIdAndUpdate(id, {$set: {body}}, {new: true}).then((err, todo) => {
+    Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then( (todo) => {
         //Check if todo object exists
+        console.log('Found todo', todo)
         if(!todo) {
             res.status(404).send();
         }
-        res.send({todo})
-
-    }).catch((e) => res.status(400).send(e));
+        res.send({todo});
+    }).catch( (e) => {
+        console.log('here:', e);
+        res.status(400).send();
+    });
 });
 
 
