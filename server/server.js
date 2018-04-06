@@ -1,3 +1,13 @@
+const env = process.env.NODE_ENV || 'development';
+if (env === 'development') {
+    process.env.PORT = 3000;
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoApp';
+} else if (env === 'test') {
+    process.env.PORT = 3000;
+    process.env.MONGODB_URI = 'mongodb://localhost:27017/TodoAppTest';
+    
+}
+
 const {mongoose} = require('./db/mongoose');
 const {ObjectID} = require('mongodb');
 const express = require('express');
@@ -5,7 +15,7 @@ const bodyParser = require('body-parser');
 const _ = require('lodash');
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT ;
 
 const {User} = require('./Models/user');
 const {Todo} = require('./Models/todo');
@@ -15,9 +25,9 @@ app.use(bodyParser.json());
 
 app.post('/todos', (req, res) => {
     const addTodo = new Todo({...req.body});
-    addTodo.save().then((doc) => {
+    addTodo.save().then((todo) => {
         console.log('Added Todo Document to db:\n', addTodo);
-        res.send(doc);
+        res.send({todo});
     }, (err) => {
         res.status(400).send(err);
     });
@@ -33,9 +43,6 @@ app.get('/todos', (req, res) => {
 
 app.get('/todos/:id', (req, res) => {
     const id = req.params.id;
-    console.log('TODO: ',id);
-
-
     if(!ObjectID.isValid(id))
         res.status(404).send();
 
@@ -55,11 +62,11 @@ app.delete('/todos/:id', (req, res) => {
         res.status(404).send();
     }
 
-    Todo.findByIdAndRemove(id).then((doc) => {
-        if(!doc) {
+    Todo.findByIdAndRemove(id).then((todo) => {
+        if(!todo) {
             res.status(404).send();
         }
-        res.send({doc});
+        res.send({todo});
     }).catch((err) => {
         res.status(400).send();
     });
@@ -83,13 +90,11 @@ app.patch('/todos/:id', (req, res) => {
 
     Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then( (todo) => {
         //Check if todo object exists
-        console.log('Found todo', todo)
         if(!todo) {
             res.status(404).send();
         }
         res.send({todo});
     }).catch( (e) => {
-        console.log('here:', e);
         res.status(400).send();
     });
 });
