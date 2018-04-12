@@ -8,17 +8,16 @@ if (env === 'development') {
     
 }
 
-const {mongoose} = require('./db/mongoose');
-const {ObjectID} = require('mongodb');
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
-
-
+const {ObjectID} = require('mongodb');
 const port = process.env.PORT ;
 
-const {User} = require('./Models/user');
+const {mongoose} = require('./db/mongoose');
 const {Todo} = require('./Models/todo');
+const {User} = require('./Models/user');
+const {authenticate} = require('./middleware/authenticate');
 
 const app = express();
 app.use(bodyParser.json());
@@ -97,6 +96,14 @@ app.patch('/todos/:id', (req, res) => {
         res.status(400).send();
     });
 });
+
+//Uses middleware function authenticate to verify token 
+app.get('/users/me', authenticate, (req, res) => {
+    res.send(req.user);
+});
+
+
+//=========================== PUBLIC ROUTES ===========================
 
 app.post('/users', (req, res) => {
     const body = _.pick(req.body, ['email', 'password']);
